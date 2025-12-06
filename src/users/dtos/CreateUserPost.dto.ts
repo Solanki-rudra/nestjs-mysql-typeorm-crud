@@ -1,9 +1,16 @@
-import { IsString } from "class-validator";
+import { IsString, IsArray, ValidateNested } from "class-validator";
+import { Type } from "class-transformer";
+import { CreateHashtag } from "./CreateHashtag.dto";
 
 export class CreateUserPostDto {
     @IsString()
-    title:string;
+    title: string;
 
     @IsString()
-    description:string;
+    description: string;
+
+    @IsArray()
+    @ValidateNested({ each: true })
+    @Type(() => CreateHashtag)
+    hashtags: CreateHashtag[]
 }

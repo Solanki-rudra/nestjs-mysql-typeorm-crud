@@ -1,12 +1,13 @@
 import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/typeorm/entities/User';
-import { TCreatePostParams, TCreateProfileParams, TCreateUserParams, TUpdateUserParams } from 'src/utils/types';
+import { TCreateHashtagParams, TCreatePostParams, TCreateProfileParams, TCreateUserParams, TUpdateUserParams } from 'src/utils/types';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { successResponse } from 'src/utils/helper';
 import { Profile } from 'src/typeorm/entities/Profile';
 import { Post } from 'src/typeorm/entities/Post';
+import { Hashtag } from 'src/typeorm/entities/Hashtag';
 
 @Injectable()
 export class UsersService {
@@ -14,7 +15,8 @@ export class UsersService {
     constructor(
         @InjectRepository(User) private userRepository: Repository<User>,
         @InjectRepository(Profile) private profileRepository: Repository<Profile>,
-        @InjectRepository(Post) private postRepository: Repository<Post>
+        @InjectRepository(Post) private postRepository: Repository<Post>,
+        @InjectRepository(Hashtag) private HashtagRepository: Repository<Hashtag>
     ) { }
 
     findUsers() {
@@ -62,7 +64,8 @@ export class UsersService {
         if(!user){
             throw new HttpException('User not found, cannot create post', HttpStatus.BAD_REQUEST)
         }
-        const newPost = this.postRepository.create({...postDetails,user})
+        const newHashtags = postDetails.hashtags.map(h => this.HashtagRepository.create(h))
+        const newPost = this.postRepository.create({...postDetails,user,hashtags: newHashtags})
         return await this.postRepository.save(newPost)
     }
 }

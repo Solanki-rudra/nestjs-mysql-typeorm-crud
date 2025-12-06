@@ -20,4 +20,9 @@ export type TCreateProfileParams = {
 export type TCreatePostParams = {
     title:string;
     description:string;
+    hashtags:TCreateHashtagParams[]
+}
+
+export type TCreateHashtagParams = {
+    title:string;
 }
