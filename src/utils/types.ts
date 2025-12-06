@@ -9,3 +9,10 @@ export type TUpdateUserParams = {
     password?:string;
     email?:string;
 }
+
+export type TCreateProfileParams = {
+    firstName:string;
+    lastName:string;
+    age:number;
+    dob:string
+}

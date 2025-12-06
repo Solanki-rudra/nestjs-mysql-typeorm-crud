@@ -1,18 +1,22 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { User } from 'src/typeorm/entities/User';
-import { TCreateUserParams, TUpdateUserParams } from 'src/utils/types';
+import { TCreateProfileParams, TCreateUserParams, TUpdateUserParams } from 'src/utils/types';
 import { Repository } from 'typeorm';
 import * as bcrypt from 'bcrypt';
 import { successResponse } from 'src/utils/helper';
+import { Profile } from 'src/typeorm/entities/Profile';
 
 @Injectable()
 export class UsersService {
 
-    constructor(@InjectRepository(User) private userRepository: Repository<User>) { }
+    constructor(
+        @InjectRepository(User) private userRepository: Repository<User>,
+        @InjectRepository(Profile) private profileRepository: Repository<Profile>
+    ) { }
 
     findUsers() {
-        return this.userRepository.find()
+        return this.userRepository.find({relations:['profile']})
     }
 
     async createUser(userDetails: TCreateUserParams) {
@@ -38,5 +42,16 @@ export class UsersService {
         const result = await this.userRepository.delete(id)
         if (result.affected === 0) throw new NotFoundException(`User Not Found`)
         return { message: 'User Deleted Successfully' }
+    }
+
+    async createUserProfile(id:number, profileDetails:TCreateProfileParams){
+        const user = await this.userRepository.findOneBy({id})
+        if(!user){
+            throw new HttpException('User not found, cannot create profile', HttpStatus.BAD_REQUEST)
+        }
+        const newProfile = this.profileRepository.create({...profileDetails,createdAt:new Date()})
+        const profile = await this.profileRepository.save(newProfile)
+        user.profile = profile
+        return await this.userRepository.save(user)
     }
 }
