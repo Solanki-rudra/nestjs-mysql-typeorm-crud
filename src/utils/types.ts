@@ -16,3 +16,8 @@ export type TCreateProfileParams = {
     age:number;
     dob:string
 }
+
+export type TCreatePostParams = {
+    title:string;
+    description:string;
+}
